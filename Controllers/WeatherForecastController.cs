@@ -1,3 +1,4 @@
+using EventusaBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventusaBackend.Controllers

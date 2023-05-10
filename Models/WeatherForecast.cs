@@ -1,4 +1,4 @@
-namespace EventusaBackend
+namespace EventusaBackend.Models
 {
     public class WeatherForecast
     {
