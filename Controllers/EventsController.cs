@@ -20,7 +20,7 @@ namespace EventusaBackend.Controllers
             _context = context;
         }
 
-        // GET: api/Event
+        // GET: api/Events
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
@@ -54,7 +54,12 @@ namespace EventusaBackend.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> PutEvent(int id, Event @event)
         {
-            if (id != @event.Id)
+            if (id != @event.eventId)
+            {
+                return BadRequest();
+            }
+
+            if (!validateDateTime(@event))
             {
                 return BadRequest();
             }
@@ -89,10 +94,16 @@ namespace EventusaBackend.Controllers
           {
               return Problem("Entity set 'EventContext.Events'  is null.");
           }
+
+          if(!validateDateTime(@event))
+            {
+                return BadRequest();
+            }
+
             _context.Events.Add(@event);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.eventId }, @event);
         }
 
         // DELETE: api/Events/5
@@ -115,9 +126,14 @@ namespace EventusaBackend.Controllers
             return NoContent();
         }
 
-        private bool EventExists(int id)
+        private bool EventExists(int eventId)
+        {   
+            return (_context.Events?.Any(e => e.eventId == eventId)).GetValueOrDefault();
+        }
+
+        private bool validateDateTime(Event @event)
         {
-            return (_context.Events?.Any(e => e.Id == id)).GetValueOrDefault();
+            return @event.endDateTime >= DateTimeOffset.Now.ToUnixTimeSeconds();
         }
     }
 }
