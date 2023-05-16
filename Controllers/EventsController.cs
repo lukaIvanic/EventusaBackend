@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EventusaBackend.Models;
+using EventusaBackend.Models.Users;
+using EventusaBackend.Models.NewFolder;
 
 namespace EventusaBackend.Controllers
 {
@@ -14,31 +16,40 @@ namespace EventusaBackend.Controllers
     public class EventsController : ControllerBase
     {
         private readonly EventContext _context;
+        private readonly EventUserContext _eventUserContext;
 
-        public EventsController(EventContext context)
+        public EventsController(EventContext context, EventUserContext eventUserContext)
         {
             _context = context;
+            _eventUserContext = eventUserContext;
         }
 
         // GET: api/Events
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
-          if (_context.Events == null)
-          {
-              return NotFound();
-          }
+            if (_context.Events == null)
+            {
+                return NotFound();
+            }
+
+            
+            
             return await _context.Events.ToListAsync();
+            
+
+
+
         }
 
         // GET: api/Events/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Event>> GetEvent(int id)
         {
-          if (_context.Events == null)
-          {
-              return NotFound();
-          }
+            if (_context.Events == null)
+            {
+                return NotFound();
+            }
             var @event = await _context.Events.FindAsync(id);
 
             if (@event == null)
@@ -90,17 +101,19 @@ namespace EventusaBackend.Controllers
         [HttpPost("create")]
         public async Task<ActionResult<Event>> PostEvent(Event @event)
         {
-          if (_context.Events == null)
-          {
-              return Problem("Entity set 'EventContext.Events'  is null.");
-          }
+            if (_context.Events == null)
+            {
+                return Problem("Entity set 'EventContext.Events'  is null.");
+            }
 
-          if(!validateDateTime(@event))
+            if (!validateDateTime(@event))
             {
                 return BadRequest();
             }
 
             _context.Events.Add(@event);
+
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetEvent), new { id = @event.eventId }, @event);
@@ -127,7 +140,7 @@ namespace EventusaBackend.Controllers
         }
 
         private bool EventExists(int eventId)
-        {   
+        {
             return (_context.Events?.Any(e => e.eventId == eventId)).GetValueOrDefault();
         }
 

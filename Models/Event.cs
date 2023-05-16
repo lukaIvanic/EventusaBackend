@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using EventusaBackend.Models.Users;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace EventusaBackend.Models
@@ -15,6 +16,8 @@ namespace EventusaBackend.Models
         public string? summary { get; set; }
         public int? isInCalendar { get; set; } // 1 -> true, 0 -> false
         public int? eventColor { get; set; }
+        public string? userIdsStringList { get; set; }
+
 
     }
 }

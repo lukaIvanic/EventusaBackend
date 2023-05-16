@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using EventusaBackend.Models;
-
+using EventusaBackend.Models.Users;
+using EventusaBackend.Models.NewFolder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,18 @@ builder.Services.AddControllers();
 var databaseName = "Server=tcp:eventusa-backend-test-server.database.windows.net,1433;Initial Catalog=eventusa-backend-test-database;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;User ID=eventusa-backend-test-admin;Password=pAss!#$%;";
 
 builder.Services.AddDbContext<EventContext>(options =>
-options.UseSqlServer( databaseName)
+options.UseSqlServer( databaseName, sqlServerOptions =>
+{
+    sqlServerOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
+})
+);
+
+builder.Services.AddDbContext<UserContext>(options =>
+options.UseSqlServer(databaseName, sqlServerOptions =>
+{
+    sqlServerOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
+})
+);
 );
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
