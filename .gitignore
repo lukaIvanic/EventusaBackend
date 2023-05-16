@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/CalendarUtils/CalendarUtils.cs
+/Controllers/EventUsersController.cs
+/Models/NewFolder/EventUser.cs
+/Models/NewFolder/EventUserContext.cs
