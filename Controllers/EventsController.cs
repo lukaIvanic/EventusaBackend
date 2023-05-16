@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EventusaBackend.Models;
 using EventusaBackend.Models.Users;
-using EventusaBackend.Models.NewFolder;
 
 namespace EventusaBackend.Controllers
 {
@@ -16,12 +15,10 @@ namespace EventusaBackend.Controllers
     public class EventsController : ControllerBase
     {
         private readonly EventContext _context;
-        private readonly EventUserContext _eventUserContext;
 
-        public EventsController(EventContext context, EventUserContext eventUserContext)
+        public EventsController(EventContext context)
         {
             _context = context;
-            _eventUserContext = eventUserContext;
         }
 
         // GET: api/Events
