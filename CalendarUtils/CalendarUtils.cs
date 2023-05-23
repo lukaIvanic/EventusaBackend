@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EventusaBackend.CalendarUtils
 {
-    public class CalendarUtils
+    public class Calendar
     {
         //Dodaje na kalendar
         public static void Generiraj(int id, DateTime start, DateTime end, string location, string subject, string description)
@@ -18,7 +18,8 @@ namespace EventusaBackend.CalendarUtils
             // Now Contruct the ICS file using string builder
             MailMessage msg = new MailMessage();
             msg.From = new MailAddress("info@ri-ing.net", "EVENTUŠA");
-            msg.To.Add(new MailAddress("riingnetdoo@gmail.com", "RI-ING NET"));
+            // msg.To.Add(new MailAddress("riingnetdoo@gmail.com", "RI-ING NET"));
+            msg.To.Add(new MailAddress("luka.ivanic7@gmail.com", "Luka Ivanic"));
             msg.Subject = subject;
             msg.Body = description;
 
@@ -61,7 +62,7 @@ namespace EventusaBackend.CalendarUtils
             smtpClient.Send(msg);
         }
 
-        //Briše sa kalendara
+        //Briše s kalendara
         public static void Cancel(int id, DateTime start, DateTime end, string location, string subject, string description)
         {
             SmtpClient smtpClient = new SmtpClient();
@@ -73,7 +74,8 @@ namespace EventusaBackend.CalendarUtils
             // Now Contruct the ICS file using string builder
             MailMessage msg = new MailMessage();
             msg.From = new MailAddress("info@ri-ing.net", "EVENTUŠA");
-            msg.To.Add(new MailAddress("riingnetdoo@gmail.com", "RI-ING NET"));
+            //msg.To.Add(new MailAddress("riingnetdoo@gmail.com", "RI-ING NET"));
+            msg.To.Add(new MailAddress("luka.ivanic7@gmail.com", "Luka Ivanic"));
             msg.Subject = subject;
             msg.Body = description;
 
