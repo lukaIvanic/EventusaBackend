@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EventusaBackend.Models;
 using EventusaBackend.Models.Users;
+using Microsoft.CodeAnalysis;
+using EventusaBackend.CalendarUtils;
+using System.Collections;
+using Microsoft.Extensions.Logging;
 
 namespace EventusaBackend.Controllers
 {
@@ -30,10 +34,10 @@ namespace EventusaBackend.Controllers
                 return NotFound();
             }
 
-            
-            
-            return await _context.Events.ToListAsync();
-            
+
+
+            return await _context.GetEventsExcludingFinished(DateTimeOffset.Now.ToUnixTimeSeconds());
+
 
 
 
@@ -60,23 +64,28 @@ namespace EventusaBackend.Controllers
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> PutEvent(int id, Event @event)
+        public async Task<IActionResult> PutEvent(int id, Event @newEvent)
         {
-            if (id != @event.eventId)
+            if (id != @newEvent.eventId)
             {
                 return BadRequest();
             }
 
-            if (!validateDateTime(@event))
+            if (!validateDateTime(@newEvent))
             {
                 return BadRequest();
             }
 
-            _context.Entry(@event).State = EntityState.Modified;
+            _context.Entry(@newEvent).State = EntityState.Modified;
+
+
+            UpdateCalendarEvent(@newEvent);
 
             try
             {
                 await _context.SaveChangesAsync();
+
+
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -91,6 +100,38 @@ namespace EventusaBackend.Controllers
             }
 
             return NoContent();
+        }
+
+        private async Task UpdateCalendarEvent(Event @newEvent)
+        {
+            var oldEvent = _context.Events.Find(@newEvent.eventId);
+
+            if (oldEvent != null && oldEvent.isInCalendar == 1)
+            {
+
+                if (@newEvent.isInCalendar == 1)
+                {
+
+                    RemoveFromCalendar(oldEvent);
+                    PostEventToCalendar(@newEvent);
+
+                }
+                else
+                {
+                    RemoveFromCalendar(oldEvent);
+                }
+            }
+            else if (@newEvent.isInCalendar == 1)
+            {
+                PostEventToCalendar(@newEvent);
+            }
+
+            if (oldEvent != null)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+
         }
 
         // POST: api/Events
@@ -110,10 +151,24 @@ namespace EventusaBackend.Controllers
 
             _context.Events.Add(@event);
 
+            if (@event.isInCalendar == 1)
+            {
+                PostEventToCalendar(@event);
+            }
+
 
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetEvent), new { id = @event.eventId }, @event);
+        }
+
+        private void PostEventToCalendar(Event @event)
+        {
+
+            DateTime startDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.startDateTime).LocalDateTime.AddHours(1);
+            DateTime endDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.endDateTime).LocalDateTime.AddHours(1);
+
+            Calendar.Generiraj(@event.eventId, startDateTime, endDateTime, @event.location ?? "", @event.title, @event.summary ?? "");
         }
 
         // DELETE: api/Events/5
@@ -131,9 +186,22 @@ namespace EventusaBackend.Controllers
             }
 
             _context.Events.Remove(@event);
+
+            if (@event.isInCalendar == 1)
+            {
+                RemoveFromCalendar(@event);
+            }
+
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private void RemoveFromCalendar(Event @event)
+        {
+            DateTime startDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.startDateTime).LocalDateTime.AddHours(1);
+            DateTime endDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.endDateTime).LocalDateTime.AddHours(1);
+            Calendar.Cancel(@event.eventId, startDateTime, endDateTime, @event.location ?? "", @event.title, @event.summary ?? "");
         }
 
         private bool EventExists(int eventId)
