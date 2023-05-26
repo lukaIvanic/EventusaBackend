@@ -44,14 +44,14 @@ namespace EventusaBackend.Controllers
               return NotFound();
           }
 
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.username == user.username);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == user.Name && u.Pass == user.Pass);
 
             if (dbUser == null)
             {
                 return NotFound();
             }
 
-            if(user.pass != dbUser.pass)
+            if(user.Pass != dbUser.Pass)
             {
                 return Unauthorized();
             }

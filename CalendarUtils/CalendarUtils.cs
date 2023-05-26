@@ -18,8 +18,8 @@ namespace EventusaBackend.CalendarUtils
             // Now Contruct the ICS file using string builder
             MailMessage msg = new MailMessage();
             msg.From = new MailAddress("info@ri-ing.net", "EVENTUŠA");
-            // msg.To.Add(new MailAddress("riingnetdoo@gmail.com", "RI-ING NET"));
-            msg.To.Add(new MailAddress("luka.ivanic7@gmail.com", "Luka Ivanic"));
+            msg.To.Add(new MailAddress("riingnetdoo@gmail.com", "RI-ING NET"));
+            //msg.To.Add(new MailAddress("luka.ivanic7@gmail.com", "Luka Ivanic"));
             msg.Subject = subject;
             msg.Body = description;
 

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using EventusaBackend.Models;
 using EventusaBackend.Models.Users;
+using EventusaBackend.Models.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var databaseName = "Server=tcp:eventusa-backend-test-server.database.windows.net,1433;Initial Catalog=eventusa-backend-test-database;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;User ID=eventusa-backend-test-admin;Password=pAss!#$%;";
+var databaseName = "Server=54.78.219.15;Initial Catalog=EVENTUSA;Persist Security Info=True;User ID=riingnet;Password=netRiInter#2018;ConnectRetryCount=0;TrustServerCertificate=True";
 
 builder.Services.AddDbContext<EventContext>(options =>
 options.UseSqlServer( databaseName, sqlServerOptions =>
