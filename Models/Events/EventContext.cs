@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace EventusaBackend.Models
+namespace EventusaBackend.Models.Events
 {
     public class EventContext : DbContext
     {
@@ -13,9 +13,10 @@ namespace EventusaBackend.Models
         public DbSet<Event> Events { get; set; } = null;
 
 
-        public async Task<List<Event>> GetEventsExcludingFinished(long nowSecondsSinceEpoch)
+        public async Task<List<Event>> GetEventsExcludingFinished(DateTimeOffset dateTimeNow)
         {
-            return await Events.Where(e => e.endDateTime > nowSecondsSinceEpoch).ToListAsync();
+            return await Events.Where(e => e.DatumVrijemeDo > dateTimeNow).ToListAsync();
+
         }
 
     }

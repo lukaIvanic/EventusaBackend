@@ -1,14 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventusaBackend.Models.Users
 {
-    [Table("users_table")]
+    [Table("USERS")]
     public class User
     {
-        public int userId {  get; set; }
-        public string displayName { get; set; }
-        public string username { get; set; }
-        public string pass { get; set; }
+        [Key]
+        public int ID { get; set; }
+        public string? Name { get; set; }
+        public string? SurName { get; set; }
+        public string? Mail { get; set; }
+        public string? Pass { get; set; }
 
 
     }

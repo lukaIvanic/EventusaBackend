@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using EventusaBackend.Models;
 using EventusaBackend.Models.Users;
 using Microsoft.CodeAnalysis;
 using EventusaBackend.CalendarUtils;
 using System.Collections;
 using Microsoft.Extensions.Logging;
+using EventusaBackend.Models.Events;
 
 namespace EventusaBackend.Controllers
 {
@@ -36,7 +36,7 @@ namespace EventusaBackend.Controllers
 
 
 
-            return await _context.GetEventsExcludingFinished(DateTimeOffset.Now.ToUnixTimeSeconds());
+            return await _context.GetEventsExcludingFinished(DateTimeOffset.Now);
 
 
 
@@ -66,12 +66,7 @@ namespace EventusaBackend.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> PutEvent(int id, Event @newEvent)
         {
-            if (id != @newEvent.eventId)
-            {
-                return BadRequest();
-            }
-
-            if (!validateDateTime(@newEvent))
+            if (id != @newEvent.IDEventa)
             {
                 return BadRequest();
             }
@@ -79,7 +74,7 @@ namespace EventusaBackend.Controllers
             _context.Entry(@newEvent).State = EntityState.Modified;
 
 
-            UpdateCalendarEvent(@newEvent);
+            await UpdateCalendarEvent(@newEvent);
 
             try
             {
@@ -99,17 +94,18 @@ namespace EventusaBackend.Controllers
                 }
             }
 
+
             return NoContent();
         }
 
         private async Task UpdateCalendarEvent(Event @newEvent)
         {
-            var oldEvent = _context.Events.Find(@newEvent.eventId);
+            var oldEvent = _context.Events.Find(@newEvent.IDEventa);
 
-            if (oldEvent != null && oldEvent.isInCalendar == 1)
+            if (oldEvent != null && oldEvent.Kalendar)
             {
 
-                if (@newEvent.isInCalendar == 1)
+                if (@newEvent.Kalendar)
                 {
 
                     RemoveFromCalendar(oldEvent);
@@ -121,7 +117,7 @@ namespace EventusaBackend.Controllers
                     RemoveFromCalendar(oldEvent);
                 }
             }
-            else if (@newEvent.isInCalendar == 1)
+            else if (@newEvent.Kalendar)
             {
                 PostEventToCalendar(@newEvent);
             }
@@ -144,14 +140,16 @@ namespace EventusaBackend.Controllers
                 return Problem("Entity set 'EventContext.Events'  is null.");
             }
 
-            if (!validateDateTime(@event))
-            {
-                return BadRequest();
-            }
+            // if (!validateDateTime(@event))
+            //{
+            //    return BadRequest();
+            //  }
+
+      
 
             _context.Events.Add(@event);
 
-            if (@event.isInCalendar == 1)
+            if (@event.Kalendar)
             {
                 PostEventToCalendar(@event);
             }
@@ -159,16 +157,16 @@ namespace EventusaBackend.Controllers
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetEvent), new { id = @event.eventId }, @event);
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.IDEventa }, @event);
         }
 
         private void PostEventToCalendar(Event @event)
         {
 
-            DateTime startDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.startDateTime).LocalDateTime.AddHours(1);
-            DateTime endDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.endDateTime).LocalDateTime.AddHours(1);
+            DateTime startDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.DatumVrijemeOd.Millisecond).LocalDateTime.AddHours(1);
+            DateTime endDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.DatumVrijemeDo.Millisecond).LocalDateTime.AddHours(1);
 
-            Calendar.Generiraj(@event.eventId, startDateTime, endDateTime, @event.location ?? "", @event.title, @event.summary ?? "");
+            Calendar.Generiraj(@event.IDEventa, startDateTime, endDateTime, @event.Lokacija ?? "", @event.Naslov, @event.Opis ?? "");
         }
 
         // DELETE: api/Events/5
@@ -187,7 +185,7 @@ namespace EventusaBackend.Controllers
 
             _context.Events.Remove(@event);
 
-            if (@event.isInCalendar == 1)
+            if (@event.Kalendar)
             {
                 RemoveFromCalendar(@event);
             }
@@ -199,19 +197,19 @@ namespace EventusaBackend.Controllers
 
         private void RemoveFromCalendar(Event @event)
         {
-            DateTime startDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.startDateTime).LocalDateTime.AddHours(1);
-            DateTime endDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.endDateTime).LocalDateTime.AddHours(1);
-            Calendar.Cancel(@event.eventId, startDateTime, endDateTime, @event.location ?? "", @event.title, @event.summary ?? "");
+            DateTime startDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.DatumVrijemeOd.Millisecond).LocalDateTime.AddHours(1);
+            DateTime endDateTime = DateTimeOffset.FromUnixTimeSeconds(@event.DatumVrijemeDo.Millisecond).LocalDateTime.AddHours(1);
+            Calendar.Cancel(@event.IDEventa, startDateTime, endDateTime, @event.Lokacija ?? "", @event.Naslov, @event.Opis ?? "");
         }
 
         private bool EventExists(int eventId)
         {
-            return (_context.Events?.Any(e => e.eventId == eventId)).GetValueOrDefault();
+            return (_context.Events?.Any(e => e.IDEventa == eventId)).GetValueOrDefault();
         }
 
         private bool validateDateTime(Event @event)
         {
-            return @event.endDateTime >= DateTimeOffset.Now.ToUnixTimeSeconds();
+            return @event.DatumVrijemeDo.Second >= DateTimeOffset.Now.ToUnixTimeSeconds();
         }
     }
 }
