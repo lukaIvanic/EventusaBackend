@@ -8,17 +8,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var databaseName = "Server=54.78.219.15;Initial Catalog=EVENTUSA;Persist Security Info=True;User ID=riingnet;Password=netRiInter#2018;ConnectRetryCount=0;TrustServerCertificate=True";
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+var connectionString = configuration.GetConnectionString("EventusaSqlDatabase");
+
 
 builder.Services.AddDbContext<EventContext>(options =>
-options.UseSqlServer( databaseName, sqlServerOptions =>
+options.UseSqlServer(connectionString, sqlServerOptions =>
 {
     sqlServerOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
 })
 );
 
 builder.Services.AddDbContext<UserContext>(options =>
-options.UseSqlServer(databaseName, sqlServerOptions =>
+options.UseSqlServer(connectionString, sqlServerOptions =>
 {
     sqlServerOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
 })
